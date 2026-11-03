@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Modal AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --c-primary: #007bff; --c-bg: #f7f9fc; --c-bg-card: #ffffff; --c-text: #212529; --c-border: #dee2e6; }
+        body.dark { --c-primary: #0088ff; --c-bg: #121212; --c-bg-card: #1e1e1e; --c-text: #f0f0f0; --c-border: #333; }
+        body { font-family: 'Inter', sans-serif; background: var(--c-bg); color: var(--c-text); margin: 0; padding: 20px; transition: 0.3s; }
+        
+        #app-wrapper { max-width: 900px; margin: 0 auto; }
+        
+        input[type="text"], textarea { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--c-border); background: var(--c-bg-card); color: var(--c-text); box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--c-primary); color: white; cursor: pointer; font-weight: 600; }
+        button:hover { opacity: 0.9; }
+        
+        .nav-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .nav-btn { background: var(--c-border); color: var(--c-text); width: auto; }
+        .nav-btn.active { background: var(--c-primary); color: white; }
+        .view-section { display: none; background: var(--c-bg-card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .view-section.active { display: block; }
+        
+        #model-tray { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        #model-tray label { padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 20px; cursor: pointer; user-select: none; }
+        #model-tray input:checked + label { background: var(--c-primary); color: white; border-color: var(--c-primary); }
+        #model-tray input { display: none; }
+
+        /* Settings Styles */
+        details { margin-bottom: 20px; border: 1px solid var(--c-border); border-radius: 8px; padding: 10px; }
+        summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        summary::after { content: '⚙️'; }
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .settings-group label { display: block; font-size: 0.85rem; margin-bottom: 5px; color: var(--c-text-light); }
+        .settings-group input { margin-bottom: 0; font-size: 0.9rem; padding: 8px; }
+
+        .response-item { background: var(--c-bg); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--c-border); }
+        .highlight { border-color: #2ecc71; box-shadow: 0 0 10px rgba(46, 204, 113, 0.2); }
+        .action-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+        .action-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; width: auto; padding: 5px; }
+        
+        #mic-btn { position: absolute; right: 10px; bottom: 25px; background: none; border: none; font-size: 1.5rem; cursor: pointer; width: auto; }
+        #mic-btn.listening { animation: pulse 1.5s infinite; color: #e74c3c; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        
+        .loading-container { text-align: center; padding: 20px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--c-border); border-top-color: var(--c-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="app-wrapper">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h1>Multi-Modal AI</h1>
+            <button onclick="toggleTheme()" style="width:auto; margin-left:5px;">🌗</button>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-btn active" onclick="switchView('generate')">Generator</button>
+            <button class="nav-btn" onclick="switchView('history')">History</button>
+        </div>
+
+        <div id="generate-view" class="view-section active">
+            
+            <div id="model-tray">
+                <input type="checkbox" id="m-gemini" checked><label for="m-gemini">Gemini</label>
+                <input type="checkbox" id="m-groq" checked><label for="m-groq">Groq</label>
+                <input type="checkbox" id="m-openrouter" checked><label for="m-openrouter">OpenRouter</label>
+                <input type="checkbox" id="m-image" checked><label for="m-image">Civitai Image</label>
+            </div>
+
+            <details>
+                <summary>Model Configuration (Advanced)</summary>
+                <div class="settings-grid">
+                    <div class="settings-group">
+                        <label>Gemini Model ID</label>
+                        <input type="text" id="cfg-gemini" value="gemini-1.5-flash">
+                    </div>
+                    <div class="settings-group">
+                        <label>Groq Model ID</label>
+                        <input type="text" id="cfg-groq" value="llama-3.1-8b-instant">
+                    </div>
+                    <div class="settings-group">
+                        <label>OpenRouter Model ID</label>
+                        <input type="text" id="cfg-openrouter" value="google/gemini-2.0-flash-exp:free">
+                    </div>
+                    <div class="settings-group">
+                        <label>Civitai Checkpoint (AIR/URN)</label>
+                        <input type="text" id="cfg-civitai" value="urn:air:sdxl:checkpoint:civitai:133005@348913">
+                        <small style="color:var(--c-text-light); font-size:0.7em;">Paste AIR from Civitai model page</small>
+                    </div>
+                </div>
+            </details>
+
+            <div style="position:relative;">
+                <textarea id="query-input" placeholder="Enter a prompt..."></textarea>
+                <button id="mic-btn">🎤</button>
+            </div>
+            <button onclick="generate()">Generate Content</button>
+            <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:20px;">
+                <div id="text-results" style="flex:1; min-width:300px;"></div>
+                <div id="image-results" style="flex:1; min-width:300px;"></div>
+            </div>
+        </div>
+
+        <div id="history-view" class="view-section">
+            <button onclick="clearHistory()" style="background:#e74c3c; width:auto; margin-bottom:15px;">Clear All</button>
+            <div id="history-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- APP LOGIC ---
+        function switchView(v) {
+            document.querySelectorAll('.view-section').forEach(e=>e.classList.remove('active'));
+            document.getElementById(v+'-view').classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
+            event.target.classList.add('active');
+            if(v==='history') renderHistory();
+        }
+
+        // Voice
+        const mic = document.getElementById('mic-btn');
+        if('webkitSpeechRecognition' in window) {
+            const r = new webkitSpeechRecognition();
+            r.continuous=false;
+            mic.onclick = () => { mic.classList.add('listening'); r.start(); };
+            r.onresult = e => { document.getElementById('query-input').value = e.results[0][0].transcript; mic.classList.remove('listening'); };
+            r.onend = () => mic.classList.remove('listening');
+        } else { mic.onclick = () => alert("Voice not supported"); }
+
+        // TTS & Copy
+        const escape = s => s ? s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,'\\n') : '';
+        window.speak = t => { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(t)); };
+        window.stopSpeak = () => window.speechSynthesis.cancel();
+        window.copy = t => navigator.clipboard.writeText(t);
+
+        // Generate
+        async function generate() {
+            const query = document.getElementById('query-input').value;
+            if(!query) return alert("Enter prompt");
+            
+            const models = {
+                gemini: document.getElementById('m-gemini').checked,
+                groq: document.getElementById('m-groq').checked,
+                openrouter: document.getElementById('m-openrouter').checked,
+                image: document.getElementById('m-image').checked
+            };
+
+            // NEW: Gather custom config
+            const config = {
+                gemini: document.getElementById('cfg-gemini').value,
+                groq: document.getElementById('cfg-groq').value,
+                openrouter: document.getElementById('cfg-openrouter').value,
+                civitai: document.getElementById('cfg-civitai').value
+            };
+
+            const txtDiv = document.getElementById('text-results');
+            const imgDiv = document.getElementById('image-results');
+            
+            txtDiv.innerHTML = '<div class="loading-container"><div class="spinner"></div></div>';
+            imgDiv.innerHTML = '<div class="loading-container"><div class="spinner"></div></div>';
+
+            try {
+                const res = await fetch('/generate-all', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({query, models, config}) // Send config to backend
+                });
+                
+                const data = await res.json();
+                
+                // Save History
+                const hist = JSON.parse(localStorage.getItem('hist')||'[]');
+                hist.unshift({id:Date.now(), query, ...data});
+                localStorage.setItem('hist', JSON.stringify(hist.slice(0,20)));
+
+                // Render
+                txtDiv.innerHTML = (data.textResults||[]).map(r => `
+                    <div class="response-item ${r.score > 90 ? 'highlight' : ''}">
+                        <h3>${r.model} (Score: ${r.score})</h3>
+                        <p>${r.answer}</p>
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="speak('${escape(r.answer)}')">🔊</button>
+                            <button class="action-btn" onclick="stopSpeak()">⏹️</button>
+                            <button class="action-btn" onclick="copy('${escape(r.answer)}')">📋</button>
+                        </div>
+                    </div>`).join('') || 'No text';
+
+                imgDiv.innerHTML = data.imageResult ? 
+                    `<img src="data:image/png;base64,${data.imageResult}" style="width:100%; border-radius:8px;">` : 'No image';
+
+            } catch(e) { txtDiv.innerHTML = `<p style="color:red">${e.message}</p>`; }
+        }
+
+        // History
+        function renderHistory() {
+            const list = document.getElementById('history-list');
+            const hist = JSON.parse(localStorage.getItem('hist')||'[]');
+            list.innerHTML = hist.length ? hist.map(h => `
+                <div class="response-item">
+                    <strong>"${h.query}"</strong>
+                    <div style="font-size:0.85rem; margin-top:5px;">
+                        ${h.textResults?.length || 0} Text responses | ${h.imageResult ? 'Image generated' : 'No image'}
+                    </div>
+                </div>`).join('') : 'No history';
+        }
+        function clearHistory() { localStorage.removeItem('hist'); renderHistory(); }
+        
+        // Theme
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+        }
+    </script>
+</body>
+</html>

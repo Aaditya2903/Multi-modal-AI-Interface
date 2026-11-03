@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information Entry Form</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .form-container { background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 400px; }
+        h2 { text-align: center; color: #333; margin: 0 0 1.5rem 0; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="email"], select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background-color: #333; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 0.5rem;}
+        #message-box { margin-top: 1rem; text-align: center; font-weight: bold; }
+        .error { color: #d9534f; }
+        .success { color: #5cb85c; }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>Data Entry Form</h2>
+        
+        <form id="entryForm">
+            <div class="form-group">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" name="fullName">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email">
+            </div>
+            
+            <div class="form-group">
+                <label>Select Your Role:</label>
+                <input type="radio" id="student" name="role" value="student">
+                <label for="student">Student</label><br>
+                <input type="radio" id="faculty" name="role" value="faculty">
+                <label for="faculty">Faculty</label><br>
+                <input type="radio" id="employee" name="role" value="employee">
+                <label for="employee">Employee</label>
+            </div>
+
+            <div class="form-group">
+                <label for="department">Department:</label>
+                <select id="department" name="department">
+                    <option value="">-- Please Select --</option>
+                    <option value="cs">Computer Science & Engineering</option>
+                    <option value="mech">Mechanical Engineering</option>
+                    <option value="ec">Electronics & Communication</option>
+                    <option value="civil">Civil Engineering</option>
+                    <option value="biotech">Biotechnology</option>
+                    <option value="ba">Business Administration</option>
+                </select>
+            </div>
+
+            <button type="submit">Submit Information</button>
+            <div id="message-box"></div>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('entryForm');
+        const messageBox = document.getElementById('message-box');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            let error = '';
+            if (form.fullName.value.trim() === '') error = 'Full Name is required.';
+            else if (form.email.value.trim() === '') error = 'Email is required.';
+            else if (!isValidEmail(form.email.value.trim())) error = 'Please enter a valid email address.';
+            else if (form.role.value === '') error = 'Please select a role.';
+            else if (form.department.value === '') error = 'Please select a department.';
+
+            if (error) {
+                displayMessage(error, 'error');
+            } else {
+                displayMessage('Form submitted successfully!', 'success');
+                form.reset();
+            }
+        });
+
+        function displayMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.className = type;
+        }
+
+        function isValidEmail(email) {
+            const at = email.indexOf('@');
+            const dot = email.lastIndexOf('.');
+            return !(email.includes(' ') || at < 1 || dot < at + 2 || dot + 2 >= email.length);
+        }
+    </script>
+
+</body>
+</html>
+

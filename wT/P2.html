@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information Entry Form</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
+
+    <div style="background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 400px;">
+        <h2 style="text-align: center; color: #333;">Data Entry Form</h2>
+        <p style="text-align: center; color: #666;">Please fill out the details below.</p>
+        
+        <form>
+            <div style="margin-bottom: 1rem;">
+                <label for="fullName" style="display: block; margin-bottom: 5px;">Full Name:</label>
+                <input type="text" id="fullName" name="fullName" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label for="email" style="display: block; margin-bottom: 5px;">Email Address:</label>
+                <input type="email" id="email" name="email" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 5px;">Select Your Role:</label>
+                <input type="radio" id="student" name="role" value="student">
+                <label for="student">Student</label><br>
+                <input type="radio" id="faculty" name="role" value="faculty">
+                <label for="faculty">Faculty</label><br>
+                <input type="radio" id="employee" name="role" value="employee">
+                <label for="employee">Employee</label>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label for="department" style="display: block; margin-bottom: 5px;">Department:</label>
+                <select id="department" name="department" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value="">-- Please Select --</option>
+                    <option value="cs">Computer Science & Engineering</option>
+                    <option value="mech">Mechanical Engineering</option>
+                    <option value="ec">Electronics & Communication</option>
+                    <option value="civil">Civil Engineering</option>
+                    <option value="biotech">Biotechnology</option>
+                    <option value="ba">Business Administration</option>
+                </select>
+            </div>
+
+            <button type="submit" style="width: 100%; padding: 10px; background-color: #333; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">Submit Information</button>
+        </form>
+    </div>
+
+</body>
+</html>
